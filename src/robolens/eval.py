@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 
 from robolens import __version__
 from robolens.approver import Approver, AutoApprover
+from robolens.compat import assert_compatible
 from robolens.controller import Controller, DefaultController
 from robolens.embodiment import Embodiment
 from robolens.errors import EmbodimentFault, PolicyError, SafetyAbort
@@ -90,14 +91,21 @@ def eval(
     fail_on_error: bool | float = False,
     controller: Controller | None = None,
     approver: Approver | None = None,
+    remap: dict[str, str] | None = None,
 ) -> list[EvalLog]:
     """Run ``task`` with ``policy`` on ``embodiment``; return ``[EvalLog]``.
 
     ``fail_on_error`` follows Inspect semantics for ``PolicyError`` (``True`` =
     fail on first, ``False`` = never, ``0<x<1`` = proportion, ``x>1`` = count).
     ``EmbodimentFault``/``SafetyAbort`` always halt regardless.
+
+    Raises :class:`~robolens.errors.CompatibilityError` (fail fast, before any
+    rollout) if the policy and embodiment are incompatible.
     """
     from robolens.logging.json_log import JsonLogSink
+
+    # Fail fast on incompatible pairings before touching any hardware/sim.
+    assert_compatible(policy, embodiment, task, remap=remap)
 
     sink_list: list[LogSink] = sinks if sinks is not None else [JsonLogSink(log_dir)]
     bus = _Broadcast(sink_list)

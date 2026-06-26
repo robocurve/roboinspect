@@ -40,6 +40,8 @@ class PolicyInfo:
     name: str
     action_space: Box
     observation_space: ObservationSpace = field(default_factory=ObservationSpace)
+    # Desired control rate (Hz), if the policy was trained for a specific one.
+    control_hz: float | None = None
 
 
 @runtime_checkable

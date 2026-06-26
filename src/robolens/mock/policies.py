@@ -13,13 +13,15 @@ import numpy as np
 
 from robolens.policy import PolicyConfig, PolicyInfo
 from robolens.scene import Scene
-from robolens.spaces import ActionSemantics, Box
+from robolens.spaces import ActionSemantics, Box, ObservationSpace
 from robolens.types import Action, ActionChunk, Observation
 
 _ACTION_SPACE = Box(
     shape=(2,),
     semantics=ActionSemantics(control_mode="eef_delta_pos", frame="world"),
 )
+# The scripted oracle reads the effector and cube positions from proprioception.
+_SCRIPTED_OBS = ObservationSpace(state_keys=frozenset({"eef_pos", "cube_pos"}))
 
 
 class ScriptedPolicy:
@@ -29,7 +31,9 @@ class ScriptedPolicy:
         self.chunk_size = chunk_size
         self.max_step = max_step
         self.num_inferences = 0
-        self.info = PolicyInfo(name="scripted", action_space=_ACTION_SPACE)
+        self.info = PolicyInfo(
+            name="scripted", action_space=_ACTION_SPACE, observation_space=_SCRIPTED_OBS
+        )
         self.config = PolicyConfig(action_horizon=chunk_size)
 
     def reset(self, scene: Scene) -> None:

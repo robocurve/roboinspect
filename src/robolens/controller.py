@@ -131,7 +131,8 @@ class EnsemblingController:
                 )
                 _ENSEMBLE_WARNED = True
         else:
-            if sem.control_mode not in _AVERAGEABLE_MODES:
+            if sem.control_mode not in _AVERAGEABLE_MODES:  # pragma: no cover
+                # Defensive: every valid ControlMode literal is currently averageable.
                 raise ValueError(
                     f"EnsemblingController cannot average control_mode {sem.control_mode!r}"
                 )

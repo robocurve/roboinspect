@@ -15,6 +15,7 @@ embodiment — a real robot or a simulator — with reproducible logs and first-
 [![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue)](https://github.com/robocurve/robolens)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Typed](https://img.shields.io/badge/typed-mypy%20strict-blue)](https://github.com/robocurve/robolens)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/robocurve/robolens/actions/workflows/ci.yml)
 
 [**Documentation**](https://robocurve.github.io/robolens/) ·
 [Quickstart](https://robocurve.github.io/robolens/guide/quickstart.html) ·

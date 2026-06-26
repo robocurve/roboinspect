@@ -118,3 +118,17 @@ markers = [
 [tool.coverage.run]
 branch = true
 source = ["robolens"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+# Lines that are never executed at runtime by design.
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "@(abc\\.)?abstractmethod",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "^\\s*\\.\\.\\.$",          # Protocol / stub bodies on their own line
+    ": \\.\\.\\.$",             # one-line Protocol method bodies (def ...: ...)
+    "pragma: no cover",
+]

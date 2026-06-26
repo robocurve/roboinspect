@@ -458,4 +458,111 @@ controller, vectorized envs, `eval_set` resume impl, web results viewer.
 3. Operator-scorer UX (terminal prompt now; richer later).
 4. Whether `Scene` should be the user-facing name vs `Sample` (chose `Scene` for
    robotics intuition; documented as the Inspect Sample analog).
+
+## 9. v3 critique resolutions (BINDING — overrides earlier sections on conflict)
+
+A second critique round (design-verification + scope lenses) found the remaining
+issues clustered in the rollout↔controller↔record triad. These resolutions are
+**binding** and supersede the prose above wherever they conflict:
+
+- **R1 — `step()` timing contract.** `Embodiment.step()` **returns as soon as the
+  command is issued** (it does *not* block until the control period elapses). The
+  **framework owns pacing** to the *effective rate* = `chunk.control_hz` →
+  `task.control_hz` → `embodiment.info.control_hz` (first non-None). A real-robot
+  adapter whose `step()` inherently blocks at the hardware rate declares
+  capability `"self_paced"`, and the rollout then skips its own pacing. `compat`
+  warns when the policy's emitted rate and the embodiment's native rate differ by
+  more than a tolerance.
+
+- **R2 — per-trial seeding.** The seed for scene `s`, epoch `e` is
+  `derive_seed(eval_seed, s.init_seed, e)` (a stable hash mix), logged per trial.
+  An integration test asserts that epochs of a *stochastic* policy diverge while a
+  deterministic policy + fixed seed reproduce bitwise. (Fixes degenerate epochs.)
+
+- **R3 — `Controller` is a single-method, stateful middleware.** Replace the
+  two-method shape with:
+  `Controller.next_action(policy, obs, t, store) -> Action`. The controller
+  *internally* decides when to call `policy.act()` (buffering the returned chunk),
+  pops the next action, and — for `EnsemblingController` (deferred) — re-infers
+  every step and blends overlapping predictions using the action space's
+  semantics. The rollout becomes **one control-rate loop** calling `next_action`
+  each step; `replan_interval` and temporal ensembling are controller-internal
+  state. `DefaultController` = play `replan_interval` actions of each chunk, then
+  re-infer. This is what lets advanced controllers compose without forking the loop.
+
+- **R4 — preprocessing ownership (resolves §2↔§3.7 conflict).** The **policy**
+  owns *model-specific spatial* preprocessing (resize / normalize / color order /
+  key remap to its native names). The **controller** owns *cross-policy temporal*
+  concerns (observation history stacking, action smoothing, ensembling). The
+  **embodiment** emits raw sensor frames. No responsibility is claimed twice.
+
+- **R5 — `FrameStore` owns frames, not sinks.** The rollout owns a `FrameStore`
+  that streams camera frames to disk (per-camera mp4 / image files) and returns
+  lightweight refs. `TrialRecord` stores **only refs** (memory-safe). `JsonLogSink`
+  references the same store; `RerunSink` optionally also logs frames. Scorers read
+  frames *through the refs*, so scoring is sink-independent and reproducible even
+  with all optional sinks off.
+
+- **R6 — operator judgement is a recorded rollout event, not a live scorer.** The
+  human success/partial judgement is captured **once during rollout** (an
+  `OperatorPrompt` event in `TrialRecord`). The `OperatorScorer` merely **reads**
+  that recorded judgement — preserving the "scorers reproducible / offline
+  re-runnable from a log" guarantee. In v0 the operator prompt is a **non-blocking
+  stub** (no blocking terminal UX; CI-safe, unattended-safe).
+
+- **R7 — scene realizability in `compat`.** An `Embodiment` declares the setup
+  hooks and target kinds it supports; `check_compatibility` verifies the task's
+  scenes are realizable on that embodiment (a scene's `setup`/`target` resolve in
+  the *embodiment's* namespace). Keeps `Task` embodiment-agnostic while catching
+  "this scene can't run on this robot" before the rollout.
+
+- **R8 — semantics live on the space, not every `Action`.** `Action` carries
+  `data` + `meta` only; `ActionSemantics` lives on the (single) action space known
+  to the rollout/controller. Removes per-step redundancy and drift.
+
+- **R9 — namespace reducers vs metrics.** `reducers.mean`/`reducers.pass_at_k`
+  (signature `list[Score] -> Score`) are distinct from `metrics.mean`/`stderr`
+  (`list[float] -> float`); register under separate namespaces to avoid collision.
+
+- **R10 — YAGNI trims for v0.** `subtasks`/`Subtask`, `progress`/`partial_success`,
+  `min_distance_to_goal`, `intervention_rate`, `composite`, and `VLMScorer` are
+  **fields/interfaces reserved but unimplemented** in v0 (nothing in the mock
+  exercises them). `image_times`/`state_time` remain as fields.
+
+## 10. v0 build order (BINDING — tracer-first, always-green)
+
+Replaces §7's bottom-up milestones with a vertical tracer + thickening, so a
+runnable end-to-end demo exists by the *second* commit and the repo stays
+shippable all night. Each step is its own commit/push.
+
+1. **M0-lite** — repo skeleton, `pyproject.toml` (hatchling + hatch-vcs),
+   ruff + `mypy --strict` + pytest config, `py.typed`, **one Linux CI job** green,
+   a **core-only (rerun/torch-free) import test**. *(Full OS/Python/numpy matrix
+   deferred to the end as allow-failure.)*
+2. **Tracer slice** — `eval(CubePick, ScriptedPolicy)` → one scene → **chunked
+   (H>1) open-loop rollout** routed through `DefaultController.next_action` +
+   `AutoApprover.review` (trivial pass-throughs, but the seams exist) → scorer
+   `success_at_end` + `reducers.mean` → `JsonLogSink` with `schema_version` +
+   atomic write. One integration test asserts success==1.0 and log round-trips.
+   **From here the repo is always demoable.**
+3. **Types/spaces thickening** — full `ActionSemantics` + `StateSpec`, immutability
+   tests.
+4. **`compat.check_compatibility`** + `CompatibilityError` fail-fast + scene
+   realizability (R7) + rate reconcile (R1) + tests.
+5. **Scorers** — builtin set, reducer type-validity, `OperatorScorer` reading a
+   recorded event (R6, non-blocking stub), reserved interfaces (R10).
+6. **Rollout hardening** — `Approver` gate logic, full error taxonomy
+   (`PolicyError` continue vs `EmbodimentFault`/`SafetyAbort` halt), circuit
+   breaker, transcript event stream + fake-sink hook-ordering test, per-trial
+   seeding (R2), `FrameStore` (R5).
+7. **Controller middleware** — promote the seam into the real `Controller`
+   (`replan_interval`); pure refactor, tests stay green.
+8. **EvalLog hardening** — `schema_version` golden read-back, binary side-car refs,
+   `EvalStats` (control rate, inference latency), `eval_set` **signature only**.
+9. **Registry + entry-point discovery + CLI `list`/`run`** (`-P k=v` string
+   resolution). *(CLI `inspect`/`score` deferred.)*
+10. **`RerunSink`** (optional, skip-guarded, no-op if missing) — leaf, low risk.
+11. **OSS hygiene polish + expand CI matrix LAST** as `continue-on-error`
+    (Linux+macOS 3.11/3.12 stay the blocking gate; Windows + 3.10/3.13 + numpy
+    1.x/2.x added allow-failure). Docs site + tutorial deferred to a later plan.
 ```

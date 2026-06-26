@@ -10,14 +10,24 @@ gate, logging each step to the sinks, and returns an immutable
 from __future__ import annotations
 
 import zlib
-from dataclasses import dataclass, field
+from collections.abc import Mapping
+from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any
 
 from robolens.approver import Approver
 from robolens.controller import Controller
 from robolens.embodiment import SELF_PACED, Embodiment
+from robolens.errors import EmbodimentFault, PolicyError, RoboLensError
+from robolens.frames import FrameRef, FrameStore
 from robolens.policy import Policy
 from robolens.scene import Scene
+from robolens.transcript import (
+    Event,
+    error_event,
+    inference_event,
+    reset_event,
+    step_event,
+)
 from robolens.types import Action, Observation, StepResult
 
 if TYPE_CHECKING:
@@ -37,12 +47,17 @@ def derive_seed(eval_seed: int | None, scene_seed: int | None, epoch: int) -> in
 
 @dataclass(frozen=True, eq=False)
 class StepRecord:
-    """One step of a recorded trajectory."""
+    """One step of a recorded trajectory.
+
+    When a :class:`~robolens.frames.FrameStore` is used, ``observation`` has its
+    images stripped and ``image_refs`` holds on-disk handles instead (R5).
+    """
 
     t: int
     observation: Observation
     action: Action
     result: StepResult
+    image_refs: Mapping[str, FrameRef] | None = None
 
 
 @dataclass
@@ -62,6 +77,8 @@ class TrialRecord:
     # Human operator's success verdict, captured once during rollout (R6). Read
     # by OperatorScorer; remains None for unattended/CI runs.
     operator_judgement: str | None = None
+    # Typed transcript of what happened during the trial.
+    events: list[Event] = field(default_factory=list)
 
 
 def _effective_control_hz(
@@ -72,6 +89,16 @@ def _effective_control_hz(
         if hz is not None:
             return hz
     return None
+
+
+def _store_frames(
+    frame_store: FrameStore | None, trial_id: str, t: int, obs: Observation
+) -> tuple[Observation, Mapping[str, FrameRef] | None]:
+    """If a frame store is configured, stream images to disk and strip them."""
+    if frame_store is None or not obs.images:
+        return obs, None
+    refs = {cam: frame_store.put(trial_id, t, cam, image) for cam, image in obs.images.items()}
+    return replace(obs, images={}), refs
 
 
 def rollout(
@@ -86,9 +113,19 @@ def rollout(
     approver: Approver,
     sink: LogSink,
     control_hz: float | None = None,
+    frame_store: FrameStore | None = None,
 ) -> TrialRecord:
-    """Run a single trial and return its record."""
+    """Run a single trial and return its record.
+
+    Generic exceptions raised by the policy are wrapped as
+    :class:`~robolens.errors.PolicyError`; by the embodiment as
+    :class:`~robolens.errors.EmbodimentFault`. Already-typed RoboLens errors
+    (incl. :class:`~robolens.errors.SafetyAbort`) propagate unchanged, so the
+    eval orchestrator can apply the correct continue-vs-halt policy.
+    """
+    trial_id = f"{scene.id}-e{epoch}"
     record = TrialRecord(scene_id=scene.id, epoch=epoch, seed=seed)
+    record.events.append(reset_event(seed))
     store: dict[str, Any] = {}
 
     policy.reset(scene)
@@ -96,11 +133,38 @@ def rollout(
 
     t = 0
     while t < max_steps:
-        action = controller.next_action(policy, obs, t, store)
-        action = approver.review(action, store)
-        result: StepResult = embodiment.step(action)
+        prev_inferences = len(store.get("_controller_inferences", []))
+        try:
+            action = controller.next_action(policy, obs, t, store)
+        except RoboLensError:
+            raise
+        except Exception as exc:
+            record.events.append(error_event(t, "PolicyError", str(exc)))
+            raise PolicyError(str(exc)) from exc
+
+        inferences = store.get("_controller_inferences", [])
+        if len(inferences) > prev_inferences:
+            latency, chunk_len = inferences[-1]
+            record.events.append(inference_event(t, latency, chunk_len))
+
+        action = approver.review(action, store)  # may raise SafetyAbort
+
+        try:
+            result: StepResult = embodiment.step(action)
+        except RoboLensError:
+            raise
+        except Exception as exc:
+            record.events.append(error_event(t, "EmbodimentFault", str(exc)))
+            raise EmbodimentFault(str(exc)) from exc
+
         sink.log_step(t, obs, action, result)
-        record.steps.append(StepRecord(t=t, observation=obs, action=action, result=result))
+        obs_rec, refs = _store_frames(frame_store, trial_id, t, obs)
+        record.steps.append(
+            StepRecord(t=t, observation=obs_rec, action=action, result=result, image_refs=refs)
+        )
+        record.events.append(
+            step_event(t, result.terminated, result.truncated, result.termination_reason)
+        )
         t += 1
 
         if result.terminated:
@@ -116,10 +180,11 @@ def rollout(
         record.truncated = True
         record.termination_reason = "max_steps"
 
-    latencies = store.get("_controller_inference_latencies", [])
-    record.inference_latencies = list(latencies)
+    record.inference_latencies = [
+        lat for lat, _ in store.get("_controller_inferences", []) if lat is not None
+    ]
     # ``control_hz`` / SELF_PACED are wired here; real-time pacing (sleep) is added
-    # in rollout hardening so the test suite stays fast.
+    # with a real-robot adapter so the test suite stays fast.
     _ = _effective_control_hz(None, control_hz, embodiment.info.control_hz)
     _ = SELF_PACED
     return record

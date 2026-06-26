@@ -21,7 +21,8 @@ from robolens.policy import Policy
 from robolens.types import Action, Observation
 
 _BUFFER_KEY = "_controller_action_buffer"
-_LATENCY_KEY = "_controller_inference_latencies"
+# Each entry is (inference_latency_s | None, chunk_len): one per policy.act() call.
+_INFER_KEY = "_controller_inferences"
 
 
 @runtime_checkable
@@ -49,6 +50,5 @@ class DefaultController:
             chunk = policy.act(observation)
             take = self.replan_interval or len(chunk)
             buffer.extend(list(chunk.actions)[:take])
-            if chunk.inference_latency_s is not None:
-                store.setdefault(_LATENCY_KEY, []).append(chunk.inference_latency_s)
+            store.setdefault(_INFER_KEY, []).append((chunk.inference_latency_s, take))
         return buffer.popleft()

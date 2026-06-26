@@ -59,6 +59,9 @@ class TrialRecord:
     status: str = "success"  # "success" (ran to completion) | "error"
     error: str | None = None
     inference_latencies: list[float] = field(default_factory=list)
+    # Human operator's success verdict, captured once during rollout (R6). Read
+    # by OperatorScorer; remains None for unattended/CI runs.
+    operator_judgement: str | None = None
 
 
 def _effective_control_hz(

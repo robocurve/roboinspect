@@ -51,22 +51,27 @@ def register(kind: Kind, name: str | None = None) -> Callable[[F], F]:
 
 
 def task(name: str | None = None) -> Callable[[F], F]:
+    """Decorator: register a task factory under ``name``."""
     return register("task", name)
 
 
 def policy(name: str | None = None) -> Callable[[F], F]:
+    """Decorator: register a policy factory under ``name``."""
     return register("policy", name)
 
 
 def embodiment(name: str | None = None) -> Callable[[F], F]:
+    """Decorator: register an embodiment factory under ``name``."""
     return register("embodiment", name)
 
 
 def scorer(name: str | None = None) -> Callable[[F], F]:
+    """Decorator: register a scorer factory under ``name``."""
     return register("scorer", name)
 
 
 def sink(name: str | None = None) -> Callable[[F], F]:
+    """Decorator: register a log-sink factory under ``name``."""
     return register("sink", name)
 
 

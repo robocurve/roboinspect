@@ -1,6 +1,6 @@
 """Register the in-tree builtin components with the registry.
 
-Imported lazily by :mod:`robolens.registry` on first lookup, so importing
+Imported lazily by [`robolens.registry`][robolens.registry] on first lookup, so importing
 ``robolens`` stays cheap and free of import cycles.
 """
 

@@ -196,7 +196,8 @@ def assert_compatible(
     *,
     remap: dict[str, str] | None = None,
 ) -> CompatibilityReport:
-    """Check compatibility and raise :class:`CompatibilityError` on hard errors."""
+    """Check compatibility and raise [`CompatibilityError`][robolens.errors.CompatibilityError] on
+    hard errors."""
     report = check_compatibility(policy, embodiment, task, remap=remap)
     report.raise_for_errors()
     return report

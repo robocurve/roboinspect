@@ -1,7 +1,7 @@
 """The Task — an embodiment-agnostic benchmark definition.
 
 Mirrors Inspect AI's ``Task = dataset + scorer + epochs/reducer``, adapted for
-robotics: the dataset is a sequence of :class:`~robolens.scene.Scene` initial
+robotics: the dataset is a sequence of [`Scene`][robolens.scene.Scene] initial
 conditions and the rollout horizon (``max_steps``) and control rate live here.
 """
 

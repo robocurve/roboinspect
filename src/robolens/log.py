@@ -66,7 +66,7 @@ class EvalResults:
 
 @dataclass
 class EvalLog:
-    """The full record returned by :func:`robolens.eval` and persisted to disk."""
+    """The full record returned by [`eval`][robolens.eval.eval] and persisted to disk."""
 
     version: int
     status: str  # "started" | "success" | "error"
@@ -100,6 +100,6 @@ class EvalLog:
 
 
 def read_eval_log(path: str) -> EvalLog:
-    """Read an :class:`EvalLog` back from a JSON file on disk."""
+    """Read an [`EvalLog`][robolens.log.EvalLog] back from a JSON file on disk."""
     with Path(path).open(encoding="utf-8") as fh:
         return EvalLog.from_dict(json.load(fh))

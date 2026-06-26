@@ -1,8 +1,9 @@
 """Controllers — the rollout middleware layer (Inspect's ``@solver`` analog).
 
-A :class:`Controller` owns the per-control-step decision of which action to send
+A [`Controller`][robolens.controller.Controller] owns the per-control-step decision of which action
+to send
 to the embodiment. It internally decides *when* to call ``policy.act()`` (a slow
-VLA inference returning an :class:`~robolens.types.ActionChunk`), buffers the
+VLA inference returning an [`ActionChunk`][robolens.types.ActionChunk]), buffers the
 returned chunk, and pops the next action each step. This single-method, stateful
 shape (R3) is what lets advanced controllers — e.g. a temporal-ensembling
 controller that re-infers every step and blends overlapping predictions —

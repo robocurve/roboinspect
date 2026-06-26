@@ -1,6 +1,6 @@
 """The canonical JSON eval-log sink.
 
-Writes the immutable :class:`~robolens.log.EvalLog` to ``log_dir`` once the run
+Writes the immutable [`EvalLog`][robolens.log.EvalLog] to ``log_dir`` once the run
 finishes. The write is atomic (temp file + ``os.replace``) so an interrupted
 overnight run never leaves a half-written log.
 """
@@ -27,7 +27,7 @@ def _slug(name: str) -> str:
 
 
 class JsonLogSink:
-    """Persist the final :class:`EvalLog` as JSON. Step events are counted only."""
+    """Persist the final [`EvalLog`][robolens.log.EvalLog] as JSON. Step events are counted only."""
 
     def __init__(self, log_dir: str):
         self.log_dir = Path(log_dir)

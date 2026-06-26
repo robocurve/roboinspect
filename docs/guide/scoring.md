@@ -1,8 +1,8 @@
 # Scoring
 
-A {class}`~robolens.scorer.Scorer` maps a recorded
-{class}`~robolens.rollout.TrialRecord` (plus the scene's
-{class}`~robolens.scene.Target`) to a {class}`~robolens.scorer.Score`. Scorers
+A [`Scorer`][robolens.scorer.Scorer] maps a recorded
+[`TrialRecord`][robolens.rollout.TrialRecord] (plus the scene's
+[`Target`][robolens.scene.Target]) to a [`Score`][robolens.scorer.Score]. Scorers
 read the *recorded* trajectory — never a live environment — so scoring is
 **reproducible from a saved log**.
 
@@ -35,14 +35,14 @@ class SmoothMotion:
         return Score(value=-sum(deltas), explanation="negative total command magnitude")
 ```
 
-Register it with {func}`~robolens.registry.scorer` to resolve it by name.
+Register it with [`scorer`][robolens.registry.scorer] to resolve it by name.
 
 ## Epochs and reducers
 
 When a `Task` runs `epochs > 1`, an **epoch reducer** collapses the per-epoch
 scores of a scene before metrics aggregate across scenes. Reducers are namespaced
 separately from metrics and are selected by name on
-{class}`~robolens.task.Epochs`:
+[`Epochs`][robolens.task.Epochs]:
 
 | Reducer | Meaning |
 |---|---|
@@ -59,6 +59,6 @@ Task(..., epochs=Epochs(count=5, reducer="pass_at_2"))
 
 Real robots have no privileged success oracle. The dominant method is a **human
 verdict**, captured *once* during the rollout (as a transcript event) and read
-back by {func}`~robolens.scorer.operator_scorer` — keeping scoring reproducible.
-A {class}`~robolens.scorer.VLMScorer` interface is reserved for scoring final
+back by [`operator_scorer`][robolens.scorer.operator_scorer] — keeping scoring reproducible.
+A [`VLMScorer`][robolens.scorer.VLMScorer] interface is reserved for scoring final
 frames with a vision-language classifier.

@@ -81,6 +81,22 @@ prefer fixing the issue.
 - **Design first for non-trivial work.** Larger features start with a short
   design note under [`plans/`](plans/); see the existing ones for the format.
 
+## Documentation
+
+The docs site is built with [MkDocs](https://www.mkdocs.org/) +
+[Material](https://squidfunk.github.io/mkdocs-material/) +
+[mkdocstrings](https://mkdocstrings.github.io/) — the API reference is generated
+from docstrings, so keep them accurate. Cross-reference other symbols with
+mkdocstrings autorefs: `` [`Observation`][robolens.types.Observation] ``.
+
+```bash
+uv pip install -e ".[docs]"
+uv run mkdocs serve            # live preview at http://127.0.0.1:8000
+uv run mkdocs build --strict   # what CI runs (warnings fail the build)
+```
+
+`llms.txt` / `llms-full.txt` are generated automatically by the `llmstxt` plugin.
+
 ## Adding a plugin (out-of-tree)
 
 Register your component(s) by publishing entry points in your package's

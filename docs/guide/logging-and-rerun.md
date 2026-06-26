@@ -2,7 +2,7 @@
 
 ## The eval log
 
-Every run produces an immutable {class}`~robolens.log.EvalLog` — the canonical,
+Every run produces an immutable [`EvalLog`][robolens.log.EvalLog] — the canonical,
 reproducible record. It mirrors Inspect AI: `version`, `status`, an `eval` spec
 (task/policy/embodiment, created time, git revision, package versions), `results`
 (aggregate metrics), `stats` (timing, inference latency), per-scene `samples`, and
@@ -20,12 +20,12 @@ a read-back guarantee: a newer RoboLens always reads an older log.
 
 ## Sinks
 
-A {class}`~robolens.logging.LogSink` observes the run lifecycle
+A [`LogSink`][robolens.logging.LogSink] observes the run lifecycle
 (`on_eval_start` → per trial `on_trial_start`/`log_step`/`on_trial_end` →
 `on_eval_end`). Builtins:
 
-- {class}`~robolens.logging.JsonLogSink` — always on; the canonical JSON record.
-- {class}`~robolens.logging.RerunSink` — optional, lazily imported.
+- [`JsonLogSink`][robolens.logging.JsonLogSink] — always on; the canonical JSON record.
+- [`RerunSink`][robolens.logging.RerunSink] — optional, lazily imported.
 
 ```python
 from robolens.logging import JsonLogSink, RerunSink
@@ -43,8 +43,8 @@ no-ops, so core never depends on it. Install with `pip install "robolens[rerun]"
 ## Frame side-cars
 
 Camera frames are large. With `store_frames=True`, the rollout streams frames to
-`<log_dir>/frames` through a {class}`~robolens.frames.FrameStore` and the
-`TrialRecord` keeps lightweight {class}`~robolens.frames.FrameRef` handles — so
+`<log_dir>/frames` through a [`FrameStore`][robolens.frames.FrameStore] and the
+`TrialRecord` keeps lightweight [`FrameRef`][robolens.frames.FrameRef] handles — so
 long, multi-camera episodes stay memory-safe and remain scorable from disk.
 
 ```python

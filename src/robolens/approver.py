@@ -3,7 +3,7 @@
 Every action passes through ``Approver.review`` before ``embodiment.step``. This
 is the robotics analog of Inspect AI's ``ApprovalPolicy`` and is more
 safety-critical: an approver may pass, clamp, or veto an action (a veto raises
-:class:`~robolens.errors.SafetyAbort`). In the tracer slice the default approver
+[`SafetyAbort`][robolens.errors.SafetyAbort]). In the tracer slice the default approver
 passes everything through; clamping/operator approval land in rollout hardening.
 """
 
@@ -23,7 +23,7 @@ class Approver(Protocol):
     """Reviews an action before it reaches the embodiment.
 
     May return the action unchanged, return a modified (e.g. clamped) action, or
-    raise :class:`~robolens.errors.SafetyAbort` to halt the eval.
+    raise [`SafetyAbort`][robolens.errors.SafetyAbort] to halt the eval.
     """
 
     def review(self, action: Action, store: dict[str, Any]) -> Action: ...

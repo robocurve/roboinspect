@@ -38,9 +38,9 @@ All notable changes to this project are documented here. The format is based on
 - **String resolution:** `eval()`/`eval_set()` accept registry names
   (`eval("cubepick-reach", "scripted", "cubepick")`) in addition to objects.
 - Dependency-free `CubePick` mock world and scripted/random/noop policies.
-- **Documentation site** (Sphinx + Furo + MyST) auto-generated from docstrings,
-  deployed to GitHub Pages, with guides, an API reference, and `llms.txt` /
-  `llms-full.txt` for LLM consumers. Homepage-style README.
+- **Documentation site** (MkDocs + Material + mkdocstrings) auto-generated from
+  docstrings, deployed to GitHub Pages, with guides, an API reference, and
+  `llms.txt` / `llms-full.txt` for LLM consumers. Homepage-style README.
 - **100% test coverage**, enforced by `--cov-fail-under=100` in CI (a blocking PR
   check). Genuinely unexecutable lines (Protocol stubs, `__main__` guards,
   defensive branches) are excluded via `tool.coverage.report`.

@@ -33,14 +33,12 @@ jobs:
         run: uv venv --python 3.12
       - name: Install (docs extras)
         run: uv pip install -e ".[docs]"
-      - name: Generate llms.txt
-        run: uv run python docs/gen_llms.py
-      - name: Build site (warnings as errors)
-        run: uv run sphinx-build -b html -W --keep-going docs docs/_build/html
+      - name: Build site (strict)
+        run: uv run mkdocs build --strict
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/_build/html
+          path: site
 
   deploy:
     name: deploy to GitHub Pages

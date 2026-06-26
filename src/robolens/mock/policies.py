@@ -1,10 +1,11 @@
 """Mock policies for the CubePick world.
 
-- :class:`ScriptedPolicy` — a deterministic oracle that walks the effector to the
+- [`ScriptedPolicy`][robolens.mock.policies.ScriptedPolicy] — a deterministic oracle that walks the
+effector to the
   cube. It predicts a full action *chunk* by simulating its own future motion, so
   the chunk is a genuine open-loop trajectory (``H > 1``).
-- :class:`RandomPolicy` — emits random deltas; mostly fails.
-- :class:`NoopPolicy` — emits zero actions; never succeeds.
+- [`RandomPolicy`][robolens.mock.policies.RandomPolicy] — emits random deltas; mostly fails.
+- [`NoopPolicy`][robolens.mock.policies.NoopPolicy] — emits zero actions; never succeeds.
 """
 
 from __future__ import annotations

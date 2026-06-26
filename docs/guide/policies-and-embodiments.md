@@ -5,9 +5,9 @@ inheritance required), or subclass the convenience base classes.
 
 ## A policy (VLA)
 
-A {class}`~robolens.policy.Policy` maps an observation to an
-{class}`~robolens.types.ActionChunk`. It declares a
-{class}`~robolens.policy.PolicyInfo` (the action space it emits and the
+A [`Policy`][robolens.policy.Policy] maps an observation to an
+[`ActionChunk`][robolens.types.ActionChunk]. It declares a
+[`PolicyInfo`][robolens.policy.PolicyInfo] (the action space it emits and the
 observations it requires) used for compatibility checking.
 
 ```python
@@ -46,12 +46,12 @@ class MyVLA:
 
 The policy owns model-specific spatial preprocessing; the embodiment emits raw
 frames. Temporal concerns (history, smoothing, ensembling) live in a
-{doc}`Controller <../guide/concepts>`.
+[Controller](../guide/concepts.md).
 
 ## An embodiment (robot or sim)
 
-An {class}`~robolens.embodiment.Embodiment` produces observations and executes
-actions. It declares an {class}`~robolens.embodiment.EmbodimentInfo` with its
+An [`Embodiment`][robolens.embodiment.Embodiment] produces observations and executes
+actions. It declares an [`EmbodimentInfo`][robolens.embodiment.EmbodimentInfo] with its
 spaces, native control rate, and opt-in capability flags.
 
 ```python
@@ -95,13 +95,13 @@ human-in-the-loop reset, wall-clock control. Simulators opt into more via
 `capabilities` (`SEEDABLE`, `AUTO_RESET`, `PRIVILEGED_SUCCESS`, `RENDERABLE`, …).
 A sim may put privileged success into `StepResult.info` for a scorer to read; a
 real robot typically relies on an operator verdict
-({func}`~robolens.scorer.operator_scorer`) or a learned classifier.
+([`operator_scorer`][robolens.scorer.operator_scorer]) or a learned classifier.
 
 ## Compatibility
 
 If the policy's action dimension/semantics or required observations don't match
-the embodiment, {func}`~robolens.eval` raises a
-{class}`~robolens.errors.CompatibilityError` before any rollout. Use `remap=` to
+the embodiment, [`eval`][robolens.eval.eval] raises a
+[`CompatibilityError`][robolens.errors.CompatibilityError] before any rollout. Use `remap=` to
 alias differing camera/state key names:
 
 ```python

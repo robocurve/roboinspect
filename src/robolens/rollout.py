@@ -1,10 +1,10 @@
 """The rollout engine — the closed control loop at the heart of RoboLens.
 
-One :func:`rollout` runs a single trial (one scene, one epoch): it drives the
-policy↔embodiment loop through the :class:`~robolens.controller.Controller`
-(open-loop chunk execution) and the :class:`~robolens.approver.Approver` safety
+One [`rollout`][robolens.rollout.rollout] runs a single trial (one scene, one epoch): it drives the
+policy↔embodiment loop through the [`Controller`][robolens.controller.Controller]
+(open-loop chunk execution) and the [`Approver`][robolens.approver.Approver] safety
 gate, logging each step to the sinks, and returns an immutable
-:class:`TrialRecord` that scorers consume.
+[`TrialRecord`][robolens.rollout.TrialRecord] that scorers consume.
 """
 
 from __future__ import annotations
@@ -49,7 +49,7 @@ def derive_seed(eval_seed: int | None, scene_seed: int | None, epoch: int) -> in
 class StepRecord:
     """One step of a recorded trajectory.
 
-    When a :class:`~robolens.frames.FrameStore` is used, ``observation`` has its
+    When a [`FrameStore`][robolens.frames.FrameStore] is used, ``observation`` has its
     images stripped and ``image_refs`` holds on-disk handles instead (R5).
     """
 
@@ -118,9 +118,9 @@ def rollout(
     """Run a single trial and return its record.
 
     Generic exceptions raised by the policy are wrapped as
-    :class:`~robolens.errors.PolicyError`; by the embodiment as
-    :class:`~robolens.errors.EmbodimentFault`. Already-typed RoboLens errors
-    (incl. :class:`~robolens.errors.SafetyAbort`) propagate unchanged, so the
+    [`PolicyError`][robolens.errors.PolicyError]; by the embodiment as
+    [`EmbodimentFault`][robolens.errors.EmbodimentFault]. Already-typed RoboLens errors
+    (incl. [`SafetyAbort`][robolens.errors.SafetyAbort]) propagate unchanged, so the
     eval orchestrator can apply the correct continue-vs-halt policy.
     """
     trial_id = f"{scene.id}-e{epoch}"

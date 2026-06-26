@@ -46,12 +46,10 @@ dev = [
     "pre-commit>=3.5",
 ]
 docs = [
-    "sphinx>=7.2",
-    "furo>=2024.1",
-    "myst-parser>=2.0",
-    "sphinx-design>=0.5",
-    "sphinx-copybutton>=0.5",
-    "sphinxext-opengraph>=0.9",
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.26",
+    "mkdocs-llmstxt>=0.2",
 ]
 all = ["robolens[rerun]"]
 

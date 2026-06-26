@@ -2,11 +2,14 @@
 
 The split below resolves the "fail fast vs never-crash-overnight" tension:
 
-- :class:`ConfigError` / :class:`CompatibilityError` are raised *before* any
+- [`ConfigError`][robolens.errors.ConfigError] /
+[`CompatibilityError`][robolens.errors.CompatibilityError] are raised *before* any
   rollout — bad configuration should fail loudly and immediately.
-- :class:`PolicyError` is recorded as a failed trial; whether it aborts the eval
+- [`PolicyError`][robolens.errors.PolicyError] is recorded as a failed trial; whether it aborts the
+eval
   is governed by ``fail_on_error`` (Inspect semantics).
-- :class:`EmbodimentFault` and :class:`SafetyAbort` *always* halt the eval
+- [`EmbodimentFault`][robolens.errors.EmbodimentFault] and
+[`SafetyAbort`][robolens.errors.SafetyAbort] *always* halt the eval
   regardless of ``fail_on_error`` — a faulted or unsafe robot must never
   auto-advance to the next scene unattended.
 """

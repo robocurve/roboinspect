@@ -38,7 +38,7 @@ print(log.status)                    # "success"
 print(log.results.metrics)           # {"success_at_end": 1.0}
 ```
 
-`eval()` returns a list of {class}`~robolens.log.EvalLog` (one per task, mirroring
+`eval()` returns a list of [`EvalLog`][robolens.log.EvalLog] (one per task, mirroring
 Inspect AI). Each log is immutable, schema-versioned, and written to `log_dir`.
 
 ## Use registry names
@@ -64,6 +64,6 @@ robolens inspect logs/cubepick-reach_*.json            # print a saved log
 
 ## Next steps
 
-- {doc}`concepts` — the core abstractions.
-- {doc}`writing-a-benchmark` — define your own `Task`.
-- {doc}`policies-and-embodiments` — plug in a real VLA or robot/sim.
+- [Concepts](concepts.md) — the core abstractions.
+- [Writing A Benchmark](writing-a-benchmark.md) — define your own `Task`.
+- [Policies And Embodiments](policies-and-embodiments.md) — plug in a real VLA or robot/sim.

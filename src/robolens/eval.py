@@ -2,7 +2,7 @@
 
 Mirrors Inspect AI's ``eval()``: it runs a task's scenes (repeated over epochs),
 scores each recorded trajectory, reduces epochs, aggregates metrics, and returns
-a list of immutable :class:`~robolens.log.EvalLog` (one per task). The tracer
+a list of immutable [`EvalLog`][robolens.log.EvalLog] (one per task). The tracer
 slice accepts already-constructed objects; registry-string resolution
 (``policy="openvla/7b"``) is layered on with the registry milestone.
 """
@@ -110,7 +110,7 @@ def eval(
     When ``store_frames`` is set, camera frames are streamed to
     ``<log_dir>/frames`` as binary side-cars (R5) rather than kept in memory.
 
-    Raises :class:`~robolens.errors.CompatibilityError` (fail fast, before any
+    Raises [`CompatibilityError`][robolens.errors.CompatibilityError] (fail fast, before any
     rollout) if the policy and embodiment are incompatible.
     """
     from robolens.logging.json_log import JsonLogSink
@@ -306,7 +306,7 @@ def eval_set(
     a stable run id) is reserved for a follow-up: ``retry_attempts`` is accepted
     now so callers don't get retrofitted, but is not yet honored.
     """
-    task_list = [tasks] if isinstance(tasks, (Task, str)) else list(tasks)
+    task_list = [tasks] if isinstance(tasks, Task | str) else list(tasks)
     logs: list[EvalLog] = []
     for task in task_list:
         logs.extend(

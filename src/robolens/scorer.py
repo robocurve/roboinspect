@@ -1,7 +1,7 @@
 """Scoring: Scores, the Scorer protocol, epoch reducers, and builtin scorers.
 
 Mirrors Inspect AI's ``@scorer``/reducer split. A scorer maps a recorded
-trajectory (+ the scene's ``Target``) to a :class:`Score`; an epoch *reducer*
+trajectory (+ the scene's ``Target``) to a [`Score`][robolens.scorer.Score]; an epoch *reducer*
 collapses the per-epoch scores of one scene into a single score before metrics
 aggregate across scenes.
 
@@ -41,7 +41,7 @@ def value_to_float(value: ScoreValue) -> float:
     """Coerce a score value to a float for metric aggregation."""
     if isinstance(value, bool):
         return 1.0 if value else 0.0
-    if isinstance(value, (int, float)):
+    if isinstance(value, int | float):
         return float(value)
     try:
         return float(value)
@@ -51,7 +51,7 @@ def value_to_float(value: ScoreValue) -> float:
 
 @runtime_checkable
 class Scorer(Protocol):
-    """Maps a recorded trajectory + scene target to a :class:`Score`."""
+    """Maps a recorded trajectory + scene target to a [`Score`][robolens.scorer.Score]."""
 
     @property
     def name(self) -> str: ...
@@ -65,13 +65,14 @@ class Scorer(Protocol):
 def _numeric(value: ScoreValue) -> float:
     """Strictly coerce a value to a number for numeric reduction.
 
-    Unlike :func:`value_to_float` (which is lenient for metric aggregation), this
+    Unlike [`value_to_float`][robolens.scorer.value_to_float] (which is lenient for metric
+    aggregation), this
     raises on a non-numeric string rather than silently coercing it to 0.0 — so a
     ``mean`` over categorical scores fails loudly instead of lying.
     """
     if isinstance(value, bool):
         return 1.0 if value else 0.0
-    if isinstance(value, (int, float)):
+    if isinstance(value, int | float):
         return float(value)
     try:
         return float(value)

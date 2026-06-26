@@ -1,6 +1,6 @@
 # Command-line interface
 
-The `robolens` CLI wraps the registry and {func}`~robolens.eval`.
+The `robolens` CLI wraps the registry and [`eval`][robolens.eval.eval].
 
 ## `robolens list`
 
@@ -28,7 +28,7 @@ The exit code is `0` on a successful eval, `1` otherwise.
 
 ## `robolens inspect`
 
-Print a summary of a saved {class}`~robolens.log.EvalLog`:
+Print a summary of a saved [`EvalLog`][robolens.log.EvalLog]:
 
 ```bash
 robolens inspect logs/cubepick-reach_xxxx.json

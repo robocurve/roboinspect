@@ -1,9 +1,9 @@
 """RoboLens — the Inspect AI for robotics.
 
 An evaluation framework for VLA (vision-language-action) models. A benchmark is
-defined once as a :class:`~robolens.task.Task` and run against any compatible
-pairing of a :class:`~robolens.policy.Policy` (the VLA) and an
-:class:`~robolens.embodiment.Embodiment` (a real robot or simulator).
+defined once as a [`Task`][robolens.task.Task] and run against any compatible
+pairing of a [`Policy`][robolens.policy.Policy] (the VLA) and an
+[`Embodiment`][robolens.embodiment.Embodiment] (a real robot or simulator).
 
 The public API is everything exported here via ``__all__``. Anything not listed
 (or prefixed with ``_``) is private and carries no stability guarantee.

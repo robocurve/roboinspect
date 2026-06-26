@@ -1,6 +1,7 @@
 """The Embodiment interface — RoboLens's second swappable input.
 
-An :class:`Embodiment` is the "body + world": a real robot or a simulator. It
+An [`Embodiment`][robolens.embodiment.Embodiment] is the "body + world": a real robot or a
+simulator. It
 produces observations, executes actions, and owns the action/observation spaces,
 the native control rate, and reset/safety machinery.
 

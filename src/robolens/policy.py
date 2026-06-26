@@ -1,11 +1,14 @@
 """The Policy (VLA) interface — one of RoboLens's two swappable inputs.
 
-A :class:`Policy` is the "brain": given an :class:`~robolens.types.Observation`
+A [`Policy`][robolens.policy.Policy] is the "brain": given an
+[`Observation`][robolens.types.Observation]
 (plus the scene's instruction), it returns an
-:class:`~robolens.types.ActionChunk` to be executed open-loop.
+[`ActionChunk`][robolens.types.ActionChunk] to be executed open-loop.
 
-The public contract is a runtime-checkable :class:`Policy` ``Protocol`` so callers
-can wrap existing models without inheriting. :class:`PolicyBase` is an optional
+The public contract is a runtime-checkable [`Policy`][robolens.policy.Policy] ``Protocol`` so
+callers
+can wrap existing models without inheriting. [`PolicyBase`][robolens.policy.PolicyBase] is an
+optional
 convenience ABC with sane defaults.
 """
 

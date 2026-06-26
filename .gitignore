@@ -216,6 +216,3 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
-
-# Sphinx generated llms files
-docs/_llms/

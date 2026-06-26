@@ -38,5 +38,8 @@ All notable changes to this project are documented here. The format is based on
 - **String resolution:** `eval()`/`eval_set()` accept registry names
   (`eval("cubepick-reach", "scripted", "cubepick")`) in addition to objects.
 - Dependency-free `CubePick` mock world and scripted/random/noop policies.
+- **Documentation site** (Sphinx + Furo + MyST) auto-generated from docstrings,
+  deployed to GitHub Pages, with guides, an API reference, and `llms.txt` /
+  `llms-full.txt` for LLM consumers. Homepage-style README.
 
 [Unreleased]: https://github.com/robocurve/robolens/commits/main

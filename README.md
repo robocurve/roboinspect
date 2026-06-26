@@ -1,49 +1,44 @@
-# RoboLens
+<div align="center">
 
-**The [Inspect AI](https://inspect.aisi.org.uk/) for robotics** — an open-source
-evaluation framework for **physical AI** and **VLA (vision-language-action)
-models**.
+# 🤖 RoboLens
 
-Define a robotics benchmark once, then run *any* VLA policy against *any*
-compatible embodiment — a real robot or a simulator — with reproducible logs and
-first-class [Rerun](https://github.com/rerun-io/rerun) visualization.
+### The [Inspect AI](https://inspect.aisi.org.uk/) for robotics
 
-> ⚠️ **Status: early alpha.** APIs are unstable and may change on any release
-> before `1.0`. This repository is the *framework*. Concrete benchmarks (the
-> "Inspect Evals for robotics") live in a separate repository.
+**An open-source evaluation framework for physical AI and VLA (vision-language-action) models.**
 
-## Why RoboLens
+Define a robotics benchmark once, then run *any* policy against *any* compatible
+embodiment — a real robot or a simulator — with reproducible logs and first-class
+[Rerun](https://github.com/rerun-io/rerun) visualization.
 
-LLM evals have one swappable input: the model. **Robotics evals have two** — the
-**policy** (the VLA "brain") and the **embodiment** (the robot/sim "body and
-world"). RoboLens makes both first-class and orthogonal:
+[![CI](https://github.com/robocurve/robolens/actions/workflows/ci.yml/badge.svg)](https://github.com/robocurve/robolens/actions/workflows/ci.yml)
+[![Docs](https://github.com/robocurve/robolens/actions/workflows/docs.yml/badge.svg)](https://robocurve.github.io/robolens/)
+[![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue)](https://github.com/robocurve/robolens)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Typed](https://img.shields.io/badge/typed-mypy%20strict-blue)](https://github.com/robocurve/robolens)
 
-- **`Policy`** — a VLA that maps observations + a language instruction to an
-  *action chunk* (a horizon of actions executed open-loop, as π0 / ACT /
-  diffusion policies do).
-- **`Embodiment`** — a real robot or simulator that produces observations,
-  executes actions, and owns the action/observation spaces and control rate.
-- **`Task`** — an embodiment-agnostic benchmark: a dataset of `Scene`s (initial
-  conditions / instructions / success targets) plus scorers.
+[**Documentation**](https://robocurve.github.io/robolens/) ·
+[Quickstart](https://robocurve.github.io/robolens/guide/quickstart.html) ·
+[Concepts](https://robocurve.github.io/robolens/guide/concepts.html) ·
+[For LLMs](https://robocurve.github.io/robolens/llms.txt)
 
-Before any rollout, RoboLens checks that a `(policy, embodiment)` pair is
-*compatible* (action/observation spaces, semantics, camera/state key mapping,
-control rate) and fails fast and loud if not.
+</div>
 
-## Design principles
+---
 
-- **Real-world first.** The interfaces assume real-robot reality (human-in-the-loop
-  reset, no privileged success oracle, wall-clock control rate); simulators are a
-  stricter special case that may offer more.
-- **Reproducible logs.** Every run produces an immutable, schema-versioned
-  `EvalLog` recording the resolved config, git revision, package versions, and
-  per-scene results — re-scorable offline.
-- **Light core, optional everything.** The core depends only on NumPy and the
-  standard library. Rerun and simulator/VLA backends are optional extras and
-  separately installable plugins.
-- **Safe unattended runs.** An explicit error taxonomy separates "record the
-  failure and continue" from "halt the eval and require a human", so a faulted
-  robot never auto-advances overnight.
+## One framework, two swappable inputs
+
+LLM evaluations have a single swappable input: the model. **Robotics evaluations
+have two** — and RoboLens makes both first-class and orthogonal:
+
+| | |
+|---|---|
+| 🧠 **`Policy`** — the VLA | The "brain". Maps an observation + instruction to an **action chunk** (a horizon of actions executed open-loop, as π0 / ACT / diffusion policies do). |
+| 🦾 **`Embodiment`** — the robot or sim | The "body + world". Produces observations, executes actions, owns the action/observation spaces and control rate. Real-robot-first; sims are a stricter special case. |
+
+A **`Task`** — a dataset of `Scene`s (initial conditions, instructions, success
+targets) plus scorers — is defined *independently* of both. Before any rollout,
+RoboLens checks the `(policy, embodiment)` pair is **compatible** (action/observation
+spaces, semantics, control rate, scene realizability) and fails fast if not.
 
 ## Install
 
@@ -52,17 +47,10 @@ pip install robolens            # core (numpy only)
 pip install "robolens[rerun]"   # + Rerun visualization
 ```
 
-Development setup uses [uv](https://github.com/astral-sh/uv):
-
-```bash
-uv venv && uv pip install -e ".[dev]"
-uv run pytest
-```
-
 ## Quickstart
 
-No hardware or simulator needed — the `CubePick` mock world exercises the whole
-stack:
+No hardware or simulator needed — the dependency-free `CubePick` mock world
+exercises the whole stack:
 
 ```python
 from robolens import eval
@@ -83,28 +71,67 @@ task = Task(
 print(log.status, log.results.metrics)   # success {'success_at_end': 1.0}
 ```
 
-Or from the command line:
+…or from the command line (components resolve from a registry):
 
 ```bash
-robolens list                                   # show registered components
+robolens list                                          # registered components
 robolens run --task cubepick-reach --policy scripted --embodiment cubepick
+robolens inspect logs/cubepick-reach_*.json            # results table
 ```
 
-See [`examples/quickstart.py`](examples/quickstart.py) for a fuller example
-(multiple scorers, epochs, reducers).
+## Why RoboLens
 
-## Extending RoboLens
+- 🌍 **Real-world first.** Interfaces assume real-robot reality — human-in-the-loop
+  reset, no privileged success oracle, wall-clock control rate. Simulators just
+  offer more (seeding, privileged success, rendering) via opt-in capabilities.
+- 🔁 **Reproducible.** Every run yields an immutable, schema-versioned `EvalLog`
+  with the resolved config, git revision, and package versions — re-readable across
+  releases, and re-scorable offline.
+- 🪶 **Light core.** Depends only on NumPy. Rerun and simulator/VLA backends are
+  optional extras and separately installable plugins.
+- 🛑 **Safe unattended.** An explicit error taxonomy separates "record and continue"
+  from "halt and require a human", so a faulted robot never auto-advances overnight.
+- 🎞️ **Rerun visualization.** Stream camera images, 3D poses, joint/action
+  time-series, and success markers to a `.rrd` recording.
+- 🧩 **Pluggable.** Ship `robolens-maniskill` or `robolens-openvla` as separate
+  packages — entry points make them appear in `robolens list` automatically.
+- ⚙️ **VLA-native.** Action chunking, open-loop execution, and ACT/ALOHA temporal
+  ensembling are built in, with action *semantics* (control mode, rotation
+  representation, gripper, frame) that make compatibility and ensembling correct.
 
-Backends ship as separate **plugin packages** that register components through
-entry points (`robolens.policies`, `robolens.embodiments`, `robolens.tasks`,
-`robolens.scorers`, `robolens.sinks`) — they then appear in `robolens list` and
-resolve by name. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+## How it maps to Inspect AI
 
-## Status & roadmap
+If you know [Inspect AI](https://inspect.aisi.org.uk/), you already know RoboLens.
 
-See [`plans/`](plans/) for the design documents. The foundation is being built as
-a vertical tracer (one scene → chunked rollout → score → log) that is then
-thickened layer by layer.
+| Inspect AI | RoboLens |
+|---|---|
+| `Model` | `Policy` (VLA) **+** `Embodiment` *(two inputs)* |
+| `Task = dataset + solver + scorer` | `Task = scenes + controller + scorer` |
+| `Sample` | `Scene` |
+| `Solver` chain | `Controller` middleware (chunking, ensembling, smoothing) |
+| `eval()` → `EvalLog` | `eval()` → `EvalLog` |
+| `@task` / `@solver` / `@scorer` + registry | `@task` / `@policy` / `@embodiment` / `@scorer` + entry points |
+
+This repository is the **framework** (the "Inspect AI for robotics"). Concrete
+benchmarks (the "Inspect Evals for robotics") and backend adapters live in
+separate plugin packages.
+
+## Documentation
+
+Full guides and an auto-generated API reference live at
+**[robocurve.github.io/robolens](https://robocurve.github.io/robolens/)**.
+LLM-friendly versions: [`llms.txt`](https://robocurve.github.io/robolens/llms.txt)
+and [`llms-full.txt`](https://robocurve.github.io/robolens/llms-full.txt).
+
+## Development
+
+```bash
+uv venv && uv pip install -e ".[dev]"
+uv run pytest
+uv run ruff check . && uv run mypy
+```
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the design docs in [`plans/`](plans/).
 
 ## License
 

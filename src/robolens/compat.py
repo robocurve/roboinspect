@@ -6,7 +6,7 @@ embodiment provides every observation the policy requires (resolving a name
 remap), the control rates are reconcilable (R1), and — given a task — every
 scene is realizable on the embodiment (R7).
 
-Hard mismatches are ``error`` issues that fail fast; soft ones are ``warning``s.
+Hard mismatches are ``error`` issues that fail fast; soft ones are warnings.
 """
 
 from __future__ import annotations

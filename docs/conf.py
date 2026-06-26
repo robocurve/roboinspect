@@ -34,7 +34,9 @@ extensions = [
     "sphinxext.opengraph",
 ]
 
-templates_path = ["_templates"]
+_HERE = Path(__file__).resolve().parent
+# Only register these if present — empty dirs don't survive a git checkout.
+templates_path = ["_templates"] if (_HERE / "_templates").is_dir() else []
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Markdown (MyST) for the homepage and guides; reStructuredText for API pages.
@@ -65,7 +67,7 @@ intersphinx_mapping = {
 # -- HTML ------------------------------------------------------------------
 html_theme = "furo"
 html_title = f"RoboLens {version}"
-html_static_path = ["_static"]
+html_static_path = ["_static"] if (_HERE / "_static").is_dir() else []
 # Ship llms.txt / llms-full.txt at the site root for LLM consumers.
 html_extra_path = ["_llms"]
 html_baseurl = "https://robocurve.github.io/robolens/"

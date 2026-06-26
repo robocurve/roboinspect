@@ -59,6 +59,47 @@ uv venv && uv pip install -e ".[dev]"
 uv run pytest
 ```
 
+## Quickstart
+
+No hardware or simulator needed — the `CubePick` mock world exercises the whole
+stack:
+
+```python
+from robolens import eval
+from robolens.mock import CubePickEmbodiment, ScriptedPolicy
+from robolens.scene import Scene
+from robolens.scorer import success_at_end
+from robolens.task import Task
+
+task = Task(
+    name="cubepick-reach",
+    scenes=[Scene(id=f"layout-{i}", instruction="reach the cube", init_seed=i) for i in range(5)],
+    scorer=success_at_end(),
+    max_steps=80,
+)
+
+# The two swappable inputs: a policy (VLA) and an embodiment (robot/sim).
+(log,) = eval(task, ScriptedPolicy(), CubePickEmbodiment())
+print(log.status, log.results.metrics)   # success {'success_at_end': 1.0}
+```
+
+Or from the command line:
+
+```bash
+robolens list                                   # show registered components
+robolens run --task cubepick-reach --policy scripted --embodiment cubepick
+```
+
+See [`examples/quickstart.py`](examples/quickstart.py) for a fuller example
+(multiple scorers, epochs, reducers).
+
+## Extending RoboLens
+
+Backends ship as separate **plugin packages** that register components through
+entry points (`robolens.policies`, `robolens.embodiments`, `robolens.tasks`,
+`robolens.scorers`, `robolens.sinks`) — they then appear in `robolens list` and
+resolve by name. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## Status & roadmap
 
 See [`plans/`](plans/) for the design documents. The foundation is being built as

@@ -11,13 +11,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Blocking gate: the supported core matrix must stay green.
   test:
-    name: lint · type · test (py${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    name: lint · type · test (${{ matrix.os }}, py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11"]
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,6 +47,46 @@ jobs:
 
       - name: Pytest
         run: pytest --cov --cov-report=term-missing
+
+  # Non-blocking: extra Python versions, Windows, and the NumPy floor. These
+  # surface platform/version issues without gating merges.
+  test-extra:
+    name: extra (${{ matrix.os }}, py${{ matrix.python-version }}, ${{ matrix.numpy }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: "3.10"
+            numpy: "numpy>=1.24,<2"
+          - os: ubuntu-latest
+            python-version: "3.13"
+            numpy: "numpy>=2"
+          - os: windows-latest
+            python-version: "3.12"
+            numpy: "numpy>=2"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install (dev extras) with pinned NumPy
+        run: |
+          uv pip install --system -e ".[dev]"
+          uv pip install --system "${{ matrix.numpy }}"
+
+      - name: Pytest
+        run: pytest -q
 
   core-only-import:
     # Enforce the dependency boundary: the core package must import with ONLY

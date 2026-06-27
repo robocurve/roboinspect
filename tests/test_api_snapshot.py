@@ -10,20 +10,64 @@ from __future__ import annotations
 import robolens
 
 EXPECTED = {
+    # evaluation + logs
+    "eval",
+    "eval_set",
+    "read_eval_log",
     "EvalLog",
     "EvalResults",
     "EvalSpec",
     "EvalStats",
     "SceneResult",
+    "TrialRecord",
+    # tasks, scenes, scoring
+    "Task",
+    "Epochs",
+    "Scene",
+    "Target",
+    "Scorer",
+    "Score",
+    "success_at_end",
+    "episode_length",
+    "min_distance_to_goal",
+    "reached_goal_state",
+    "operator_scorer",
+    # the two swappable inputs
+    "Policy",
+    "PolicyBase",
+    "PolicyInfo",
+    "PolicyConfig",
+    "Embodiment",
+    "EmbodimentBase",
+    "EmbodimentInfo",
+    # types & spaces
+    "Observation",
+    "Action",
+    "ActionChunk",
+    "StepResult",
+    "Box",
+    "ActionSemantics",
+    "ObservationSpace",
+    "CameraSpec",
+    "StateField",
+    "StateSpec",
+    # registry decorators + resolution
+    "task",
+    "policy",
+    "embodiment",
+    "scorer",
+    "sink",
+    "registered",
+    "resolve",
+    # meta
     "__version__",
-    "eval",
-    "eval_set",
-    "read_eval_log",
 }
 
 
 def test_public_api_snapshot() -> None:
     assert set(robolens.__all__) == EXPECTED
+    # __all__ must have no duplicates.
+    assert len(robolens.__all__) == len(set(robolens.__all__))
 
 
 def test_public_names_are_importable() -> None:

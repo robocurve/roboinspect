@@ -9,6 +9,15 @@ All notable changes to this project are documented here. The format is based on
 
 ### Added
 
+- **Widened the public API for plugin authors.** `robolens.__all__` now exports
+  the authoring primitives directly — `Task`/`Epochs`, `Scene`/`Target`,
+  `Scorer`/`Score` and the builtin scorers, `Policy`/`PolicyBase`/`PolicyInfo`/
+  `PolicyConfig`, `Embodiment`/`EmbodimentBase`/`EmbodimentInfo`, the
+  `types`/`spaces` dataclasses, `TrialRecord`, and the `@task`/`@policy`/
+  `@embodiment`/`@scorer`/`@sink` registry decorators plus `registered`/`resolve`.
+  Out-of-tree benchmarks (e.g. KitchenBench) and adapters can now `from robolens
+  import Task, Scene, task, ...` against a stable surface.
+
 - **Core framework foundation.** The two-input model for robotics evals:
   `Policy` (VLA) and `Embodiment` (real robot or simulator), with a benchmark
   `Task` defined independently of both.

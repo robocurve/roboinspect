@@ -16,9 +16,23 @@ eval
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from robolens.rollout import TrialRecord
+
 
 class RoboLensError(Exception):
-    """Base class for all RoboLens errors."""
+    """Base class for all RoboLens errors.
+
+    When an error is raised from inside a running trial, the rollout engine
+    attaches the partial [`TrialRecord`][robolens.rollout.TrialRecord] — the
+    steps walked and the transcript events up to the failure — as ``record``,
+    so the orchestrator can preserve it in logs. ``record`` is ``None`` for
+    errors raised outside a rollout (configuration, compatibility, ...).
+    """
+
+    record: TrialRecord | None = None
 
 
 class ConfigError(RoboLensError):

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import functools
 import json
-import warnings
 from pathlib import Path
 
 import numpy as np
@@ -120,13 +119,25 @@ def test_controller_validation_raises() -> None:
         EnsemblingController(Box(shape=(2,), semantics=_CUBE_SEM), m=-1.0)
 
 
-def test_ensembling_warns_only_once(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(controller_mod, "_ENSEMBLE_WARNED", False)
+def test_ensembling_warns_per_instance() -> None:
+    # No global warn-once state: every instance constructed without semantics
+    # warns, independent of construction order elsewhere in the process.
     with pytest.warns(RuntimeWarning):
         EnsemblingController(Box(shape=(2,)))
-    with warnings.catch_warnings():
-        warnings.simplefilter("error")  # a second warning would raise
-        EnsemblingController(Box(shape=(2,)))  # already warned -> no warning
+    with pytest.warns(RuntimeWarning):
+        EnsemblingController(Box(shape=(2,)))
+
+
+def test_default_controller_records_actual_buffered_count() -> None:
+    # replan_interval larger than the chunk: the recorded per-inference count is
+    # the number of actions actually buffered, not the requested interval.
+    policy = ScriptedPolicy(chunk_size=4)
+    embodiment = CubePickEmbodiment()
+    obs = embodiment.reset(_SCENE, seed=0)
+    store: dict[str, object] = {}
+    DefaultController(replan_interval=10).next_action(policy, obs, 0, store)
+    inferences = store[controller_mod._INFER_KEY]
+    assert inferences[-1][1] == 4  # type: ignore[index]
 
 
 # --------------------------------------------------------------------------- #
@@ -210,8 +221,12 @@ def test_min_distance_without_signal() -> None:
 # --------------------------------------------------------------------------- #
 # rollout
 # --------------------------------------------------------------------------- #
-def test_effective_control_hz_all_none() -> None:
+def test_effective_control_hz_precedence() -> None:
+    # First non-None of chunk -> task -> embodiment (R1).
     assert _effective_control_hz(None, None, None) is None
+    assert _effective_control_hz(30.0, 20.0, 10.0) == 30.0
+    assert _effective_control_hz(None, 20.0, 10.0) == 20.0
+    assert _effective_control_hz(None, None, 10.0) == 10.0
 
 
 class _PolicyErrorPolicy:

@@ -85,10 +85,7 @@ def test_rejects_unaverageable_semantics() -> None:
         )
 
 
-def test_warns_when_semantics_missing(monkeypatch: pytest.MonkeyPatch) -> None:
-    import robolens.controller as ctrl_mod
-
-    monkeypatch.setattr(ctrl_mod, "_ENSEMBLE_WARNED", False)
+def test_warns_when_semantics_missing() -> None:
     with pytest.warns(RuntimeWarning, match="no semantics"):
         EnsemblingController(Box(shape=(2,)))
 
